@@ -1,0 +1,110 @@
+---
+title: "crx_enhancer"
+author: "Ehsan Ullah"
+date: "September 27, 2019"
+output: html_document
+---
+
+#Analysis of crx data.
+
+##Import the annotated crx enhancer data from /data/ullahe2/crx_enhancer_phaseII
+```{r}
+
+library(tidyverse)
+library(dplyr)
+
+crx_regions <- read.delim("E:/crx_enhancer_phase-II/final_crx_goodpeaks_mm9.narrowPeak_human_grch37_v1_gnomAD_annotated.tsv")
+
+crx_dat <- crx_regions %>% 
+  select(genomic_region, region_ID, CHROM, POS, ID, REF, ALT ,AF, AF_popmax, AC, AC_popmax, phyloP_100way, cadd_phred) %>%
+  separate(genomic_region, c("start", "end"), sep = "-", remove = FALSE ) %>% 
+  separate (start, c("chr", "start"), sep = ":") %>% 
+  mutate(start=as.numeric(start)) %>% 
+  mutate(end=as.numeric(end)) %>% 
+  mutate(region_size = end - start) %>%
+  mutate(AF=as.numeric(as.character(AF))) %>%
+  mutate(AF_popmax=as.numeric(as.character(AF_popmax))) %>%
+  mutate(cadd_phred=as.numeric(as.character(cadd_phred)))
+
+crx2 <- crx_dat %>%  
+  group_by(region_ID) %>%
+  
+  mutate(sigmaAF=sum(AF, na.rm = TRUE)) %>% # Sigma allele frequency
+  mutate(adj_sigmaAF = 1000*(sigmaAF/region_size)) %>% 
+  
+  mutate(meanAF=mean(AF, na.rm=TRUE)) %>% # Mean allele frequency
+  mutate(adj_meanAF=1000*(meanAF/region_size)) %>% # Adjusted mean allele frequency.
+  
+  mutate(medianAF=median(AF, na.rm=TRUE)) %>% # Median allele frequency
+  mutate(adj_medianAF=1000*(medianAF/region_size)) %>% # Adjusted median allele frequency
+  
+  mutate(maxAF=max(AF, na.rm=TRUE)) %>% # Maximum allele frequency
+  mutate(adj_maxAF=1000*(maxAF/region_size)) %>% # Adjusted maximum allele frequency
+  
+  mutate(sigmaAF_popmax=sum(AF_popmax, na.rm=TRUE)) %>% 
+  mutate(adj_sigmaAF_popmax = 1000*(sigmaAF_popmax/region_size)) %>%
+  
+  mutate(meanAF_popmax=mean(AF_popmax, na.rm=TRUE)) %>% # Mean population maximum allele frequency
+  mutate(adj_meanAF_popmax=1000*(meanAF_popmax/region_size)) %>% # Adjusted mean population maximum allele frequency
+ 
+  mutate(medianAF_popmax=median(AF_popmax, na.rm=TRUE)) %>% # Median population maximum allele frequency
+  mutate(adj_medianAF_popmax=1000*(medianAF_popmax/region_size)) %>% # Adjusted median population maximum allele frequency
+  
+  mutate(maxAF_popmax=max(AF_popmax, na.rm=TRUE)) %>% # Maximum allele frequency - population maximum
+  mutate(adj_maxAF_popmax=1000*(maxAF_popmax/region_size)) %>% # Adjusted maximum allele frequency - population maximum
+  
+  mutate(sigmaAC=sum(AC, na.rm=TRUE)) %>%
+  mutate(adj_sigmaAC = sigmaAC/region_size) %>%
+  
+  mutate(meanAC=mean(AC, na.rm=TRUE)) %>% 
+  mutate(adj_meanAC=meanAC/region_size) %>% 
+ 
+  mutate(medianAC=median(AC, na.rm=TRUE)) %>% 
+  mutate(adj_medianAC=medianAC/region_size) %>% 
+  
+  mutate(maxAC=max(AC, na.rm=TRUE)) %>% 
+  mutate(adj_maxAC=maxAC/region_size) %>% 
+  
+  mutate(sigmaPhyloP = sum(phyloP_100way, na.rm=TRUE)) %>% 
+  mutate(adj_sigmaPhyloP = 10*(sigmaPhyloP/region_size)) %>%
+  
+  mutate(meanPhyloP=mean(phyloP_100way, na.rm=TRUE)) %>%
+  mutate(adj_meanPhyloP=10*(meanPhyloP/region_size)) %>%
+  
+  mutate(medianPhyloP=median(phyloP_100way, na.rm=TRUE)) %>%
+  mutate(adj_medianPhyloP=10*(medianPhyloP/region_size)) %>%
+  
+  mutate(maxPhyloP=max(phyloP_100way, na.rm=TRUE)) %>%
+  mutate(adj_maxPhyloP=10*(maxPhyloP/region_size)) %>%
+  
+  mutate(sigmaCADD=sum(cadd_phred, na.rm=TRUE)) %>% 
+  mutate(adj_sigmaCADD = sigmaCADD/region_size) %>% 
+  
+  mutate(meanCADD=mean(cadd_phred, na.rm=TRUE)) %>%
+  mutate(adj_meanCADD=meanCADD/region_size) %>%
+  
+  mutate(medianCADD=median(cadd_phred, na.rm=TRUE)) %>%
+  mutate(adj_medianCADD=medianCADD/region_size) %>%
+  
+  mutate(maxCADD=max(cadd_phred, na.rm=TRUE)) %>%
+  mutate(adj_maxCADD=maxCADD/region_size) 
+
+write_tsv(crx2,"crx_enhancer_annotated_summary_stats.tsv")
+
+
+
+```
+
+```{r}
+library(data.table)
+
+crx_goodpeaks_UK10K_vars <- fread("E:/crx_enhancer_phase_I/ChenHufnagelCollab_CRXsites/UK10K_variants/Crx_goodpeaks_mm9.narrowPeak_liftover_human_grch37_UK10K_variants.tsv")
+
+
+```
+
+
+```{r}
+
+save.image("A:/git/crx_enhancer/crx_enhancer.Rproj.RData")
+```

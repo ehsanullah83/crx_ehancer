@@ -1,0 +1,16 @@
+"0","crx_dat <- crx_regions %>% 
+  select(genomic_region, region_ID, CHROM, POS, ID, REF, ALT ,AF, AF_popmax, AC, AC_popmax, phyloP_100way, cadd_phred) %>%
+  separate(genomic_region, c(""start"", ""end""), sep = ""-"", remove = FALSE ) %>% 
+  separate (start, c(""chr"", ""start""), sep = "":"") %>% 
+  mutate(start=as.numeric(start)) %>% 
+  mutate(end=as.numeric(end)) %>% 
+  mutate(region_size = end - start) %>%
+  mutate(AF=as.numeric(as.character(AF))) %>%
+  mutate(AF_popmax=as.numeric(as.character(AF_popmax))) %>%
+  mutate(cadd_phred=as.numeric(as.character(cadd_phred)))
+"
+"2","Expected 2 pieces. Additional pieces discarded in 190 rows [4471, 4472, 4473, 4474, 4475, 4476, 4477, 4478, 4479, 4480, 4481, 4482, 4483, 4484, 4485, 4486, 4487, 4488, 4489, 4490, ...]."
+"2","NAs introduced by coercion"
+"2","NAs introduced by coercion"
+"2","NAs introduced by coercion"
+"2","NAs introduced by coercion"
